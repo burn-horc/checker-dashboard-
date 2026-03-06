@@ -50,35 +50,14 @@ function convertCookieFormat(raw) {
 
 app.post("/api/check", async (req, res) => {
 
-  const { cookie } = req.body;
+  let { cookie } = req.body;
 
   if (!cookie) {
-    return res.json({
-      status: "INVALID"
-    });
+    return res.json({ status: "INVALID" });
   }
 
   try {
 
-    // Fake result for now (we will add real Netflix request later)
-
-    res.json({
-      status: "VALID",
-      plan: "PREMIUM",
-      country: "US",
-      profiles: "5",
-      extra_member: "YES"
-    });
-
-  } catch (err) {
-
-    res.json({
-      status: "ERROR"
-    });
-
-  }
-
-});
     cookie = convertCookieFormat(cookie);
 
     const response = await fetch(
