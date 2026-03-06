@@ -61,11 +61,12 @@ function convertCookieFormat(raw) {
     // Netscape cookie format
     if (line.includes(".netflix.com") && line.split(/\s+/).length >= 7) {
 
-      const parts = line.split(/\s+/);
-      const name = parts[5];
-const value = parts.slice(6).join(" ");
-cookies.push(`${name}=${value}`);
-
+  const parts = line.split(/\s+/);
+  const name = parts[5];
+  const value = parts.slice(6).join(" ");
+  cookies.push(`${name}=${value}`);
+  continue;
+}
     // Header format
     if (line.toLowerCase().startsWith("cookie:")) {
 
