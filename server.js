@@ -82,14 +82,17 @@ app.post("/api/check", async (req, res) => {
   headers: {
     cookie: cookie,
     "user-agent": "Mozilla/5.0"
-  }
+  },
+  redirect: "follow"
 });
+
+if (response.url.includes("login")) {
+  return res.json({ status: "INVALID" });
+}
 
 const text = await response.text();
 
-if (!text.includes("Netflix")) {
-  return res.json({ status: "INVALID" });
-}
+
 
     /* =========================
        PARSE DATA
