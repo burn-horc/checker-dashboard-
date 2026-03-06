@@ -13,8 +13,7 @@ function App() {
       return;
     }
 
-    const cookieList = cookies
-      .split("\n")
+    const cookieList = [cookies];
       .map(c => c.trim())
       .filter(c => c !== "");
 
