@@ -13,9 +13,10 @@ function App() {
       return;
     }
 
-    const cookieList = [cookies]
-  .map(c => c.trim())
-  .filter(c => c !== "");
+    const cookieList = cookies
+      .split("\n")
+      .map(c => c.trim())
+      .filter(Boolean);
 
     setResults([]);
     setLoading(true);
@@ -34,11 +35,11 @@ function App() {
 
         const data = await res.json();
 
-        if (data.status === "LIVE")
+        if (data.status === "LIVE") {
 
           setResults(prev => [
             ...prev,
-            `HIT | ${data.plan} | ${data.country} | PROFILES:${data.profiles}`
+            `LIVE | ${data.plan} | ${data.country} | PROFILES:${data.profiles}`
           ]);
 
         } else {
