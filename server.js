@@ -60,74 +60,77 @@ app.post("/api/check", async (req, res) => {
 
     cookie = convertCookieFormat(cookie);
 
-    const response = await fetch(
-      "https://www.netflix.com/account",
-      {
-        headers: {
-          "User-Agent": "Mozilla/5.0",
-          "Cookie": cookie
-        }
+    const response = await fetch("https://www.netflix.com/account", {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        "Cookie": cookie
       }
-    );
+    });
 
-   const text = await response.text();
+    const text = await response.text();
 
-if (!text.includes("account")) {
-  return res.json({ status: "INVALID" });
-}
+    if (!text.includes("account")) {
+      return res.json({ status: "INVALID" });
+    }
 
-/* =========================
-   PARSE DATA
-========================= */
+    /* =========================
+       PARSE DATA
+    ========================= */
 
-let plan = "UNKNOWN";
+    let plan = "UNKNOWN";
 
-if (text.toLowerCase().includes("premium")) plan = "PREMIUM";
-else if (text.toLowerCase().includes("standard")) plan = "STANDARD";
-else if (text.toLowerCase().includes("basic")) plan = "BASIC";
+    if (text.toLowerCase().includes("premium")) plan = "PREMIUM";
+    else if (text.toLowerCase().includes("standard")) plan = "STANDARD";
+    else if (text.toLowerCase().includes("basic")) plan = "BASIC";
 
-let country = "UNKNOWN";
-const countryMatch = text.match(/"currentCountry":"(.*?)"/);
-if (countryMatch) country = countryMatch[1];
+    let country = "UNKNOWN";
+    const countryMatch = text.match(/"currentCountry":"(.*?)"/);
+    if (countryMatch) country = countryMatch[1];
 
-let email = "UNKNOWN";
-const emailMatch = text.match(/"email":"(.*?)"/);
-if (emailMatch) email = emailMatch[1];
+    let email = "UNKNOWN";
+    const emailMatch = text.match(/"email":"(.*?)"/);
+    if (emailMatch) email = emailMatch[1];
 
-let profiles = 0;
-const profilesMatch = text.match(/"profiles":\[(.*?)\]/);
-if (profilesMatch) {
-  profiles = (profilesMatch[1].match(/profileName/g) || []).length;
-}
+    let profiles = 0;
+    const profilesMatch = text.match(/"profiles":\[(.*?)\]/);
+    if (profilesMatch) {
+      profiles = (profilesMatch[1].match(/profileName/g) || []).length;
+    }
 
-let kidsProfiles = 0;
-const kidsMatch = text.match(/"isKids":true/g);
-if (kidsMatch) kidsProfiles = kidsMatch.length;
+    let kidsProfiles = 0;
+    const kidsMatch = text.match(/"isKids":true/g);
+    if (kidsMatch) kidsProfiles = kidsMatch.length;
 
-let extraMembers = "UNKNOWN";
-if (text.toLowerCase().includes("extra member")) {
-  extraMembers = "AVAILABLE";
-}
+    let extraMembers = "NONE";
+    if (text.toLowerCase().includes("extra member")) {
+      extraMembers = "AVAILABLE";
+    }
 
-let paymentStatus = "ACTIVE";
-if (text.toLowerCase().includes("payment method")) {
-  paymentStatus = "ACTIVE";
-}
+    let paymentStatus = "ACTIVE";
+    if (!text.toLowerCase().includes("payment method")) {
+      paymentStatus = "UNKNOWN";
+    }
 
-/* =========================
-   RESPONSE
-========================= */
+    res.json({
+      status: "VALID",
+      plan,
+      country,
+      profiles,
+      kidsProfiles,
+      extraMembers,
+      email,
+      paymentStatus
+    });
 
-res.json({
-  status: "VALID",
-  plan,
-  country,
-  profiles,
-  kidsProfiles,
-  extraMembers,
-  email,
-  paymentStatus
+  } catch (err) {
+
+    console.error(err);
+    res.json({ status: "ERROR" });
+
+  }
+
 });
+
 /* =========================
    START SERVER
 ========================= */
