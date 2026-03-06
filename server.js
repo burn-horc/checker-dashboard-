@@ -78,9 +78,9 @@ app.post("/api/check", async (req, res) => {
 
     let plan = "UNKNOWN";
 
-    if (text.includes("Premium")) plan = "PREMIUM";
-    else if (text.includes("Standard")) plan = "STANDARD";
-    else if (text.includes("Basic")) plan = "BASIC";
+if (text.toLowerCase().includes("premium")) plan = "PREMIUM";
+else if (text.toLowerCase().includes("standard")) plan = "STANDARD";
+else if (text.toLowerCase().includes("basic")) plan = "BASIC";
 
     let country = "UNKNOWN";
     const match = text.match(/"currentCountry":"(.*?)"/);
