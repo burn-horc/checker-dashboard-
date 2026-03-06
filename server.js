@@ -100,9 +100,9 @@ if (cookie.includes(".netflix.com")) {
 } else {
   // Multiple cookies separated by blank line
   cookieList = cookie
-    .split("\n\n")
-    .map(c => convertCookieFormat(c))
-    .filter(Boolean);
+  .split(/\n\s*\n/)
+  .map(c => convertCookieFormat(c))
+  .filter(Boolean);
 }
 
   try {
