@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import axios from "axios";
 
 const app = express();
 
@@ -14,31 +15,49 @@ const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT || 8080;
 
 
-// API ROUTE
-app.post("/api/check", (req, res) => {
+
+// REAL COOKIE CHECK
+app.post("/api/check", async (req, res) => {
 
   const { cookie } = req.body;
 
-  if (!cookie || cookie.length < 5) {
-    return res.json({
+  if (!cookie) {
+    return res.json({ status: "INVALID" });
+  }
+
+  try {
+
+    const response = await axios.get(
+      "https://www.netflix.com/YourAccount",
+      {
+        headers: {
+          Cookie: cookie,
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        },
+        timeout: 10000
+      }
+    );
+
+    if (response.data.includes("account")) {
+      res.json({
+        status: "VALID",
+        plan: "Detected"
+      });
+    } else {
+      res.json({
+        status: "INVALID"
+      });
+    }
+
+  } catch (error) {
+    res.json({
       status: "INVALID"
     });
   }
 
-  // fake detection example
-  if (cookie.includes("premium")) {
-    return res.json({
-      status: "VALID",
-      plan: "Premium"
-    });
-  }
-
-  return res.json({
-    status: "VALID",
-    plan: "Standard"
-  });
-
 });
+
 
 
 // SERVE FRONTEND
