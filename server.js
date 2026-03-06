@@ -87,6 +87,8 @@ app.post("/api/check", async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log("Checker server running");
+const PORT = process.env.PORT || 8080;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("Checker server running on port " + PORT);
 });
