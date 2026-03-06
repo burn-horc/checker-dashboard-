@@ -2,13 +2,16 @@ import express from "express";
 import cors from "cors";
 import { checkCookie } from "./main.js";
 
+const express = require("express");
+const cors = require("cors");
+
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Checker API running");
+  res.send("Server is running");
 });
 
 app.post("/check", async (req, res) => {
@@ -22,20 +25,10 @@ app.post("/check", async (req, res) => {
     const result = await checkCookie(cookie);
 
     res.json(result);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
-
-const express = require("express");
-const cors = require("cors");
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("Server is running");
 });
 
 const PORT = process.env.PORT || 3000;
@@ -43,4 +36,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on ${PORT}`);
 });
-  
