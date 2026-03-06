@@ -79,11 +79,14 @@ app.post("/api/check", async (req, res) => {
     cookie = convertCookieFormat(cookie);
 
     const response = await fetch("https://www.netflix.com/account", {
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-        "Cookie": cookie
-      }
-    });
+  headers: {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "Accept": "text/html,application/xhtml+xml",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Connection": "keep-alive",
+    "Cookie": cookie
+  }
+});
 
     const text = await response.text();
 
