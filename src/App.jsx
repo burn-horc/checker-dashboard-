@@ -48,7 +48,9 @@ PAYMENT STATUS: ${data.paymentStatus}
         Check Cookie
       </button>
 
-      <h2>{result}</h2>
+     <pre style={{ whiteSpace: "pre-wrap", fontSize: "18px" }}>
+  {result}
+</pre>
 
     </div>
   );
