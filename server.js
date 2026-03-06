@@ -70,28 +70,34 @@ app.post("/api/check", async (req, res) => {
       }
     );
 
-    const text = await response.text();
+   const text = await response.text();
 
-    if (!text.includes("account")) {
-      return res.json({ status: "INVALID" });
-    }
+if (
+  text.includes("Sign In") ||
+  text.includes("login") ||
+  text.includes("Please sign in") ||
+  !text.includes("memberHome")
+) {
+  return res.json({ status: "INVALID" });
+}
 
-    let plan = "UNKNOWN";
+let plan = "UNKNOWN";
 
 if (text.toLowerCase().includes("premium")) plan = "PREMIUM";
 else if (text.toLowerCase().includes("standard")) plan = "STANDARD";
 else if (text.toLowerCase().includes("basic")) plan = "BASIC";
 
-    let country = "UNKNOWN";
-    const match = text.match(/"currentCountry":"(.*?)"/);
-    if (match) country = match[1];
+let country = "UNKNOWN";
+const match = text.match(/"currentCountry":"(.*?)"/);
 
-    res.json({
-      status: "VALID",
-      plan,
-      country
-    });
+if (match) country = match[1];
 
+res.json({
+  status: "VALID",
+  plan,
+  country
+});
+     
   } catch (err) {
     res.json({ status: "ERROR" });
   }
