@@ -22,9 +22,8 @@ function CheckerPage() {
       return;
     }
 
-    setResult(
-`${data.status}
-Plan: ${data.plan}
+    result.innerText =
+  data.status + (data.plan ? " - " + data.plan : "");
 Country: ${data.country}
 Profiles: ${data.profiles}
 Extra Member: ${data.extra_member}`
