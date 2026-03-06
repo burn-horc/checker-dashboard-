@@ -63,11 +63,8 @@ function convertCookieFormat(raw) {
 
       const parts = line.split(/\s+/);
       const name = parts[5];
-      const value = parts[6];
-
-      cookies.push(`${name}=${value}`);
-      continue;
-    }
+const value = parts.slice(6).join(" ");
+cookies.push(`${name}=${value}`);
 
     // Header format
     if (line.toLowerCase().startsWith("cookie:")) {
@@ -143,11 +140,17 @@ app.post("/api/check", async (req, res) => {
       ========================= */
 
       const isLive =
-        text.includes("profilesGate") ||
-        text.includes("memberHome") ||
-        text.includes("profileName");
+  response.status === 200 &&
+  (
+    text.includes("profilesGate") ||
+    text.includes("memberHome") ||
+    text.includes("accountOwner") ||
+    text.includes("reactContext") ||
+    text.includes("profileName") ||
+    text.includes("nmhp")
+  );
 
-      if (!isLive) continue;
+if (!isLive) continue;
 
       /* =========================
          PARSE ACCOUNT DATA
