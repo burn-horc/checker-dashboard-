@@ -18,11 +18,11 @@ function App() {
     const data = await res.json();
 
     if (data.status !== "VALID") {
-  setResult("INVALID");
-  return;
-}
+      setResult("INVALID");
+      return;
+    }
 
-setResult(`
+    setResult(`
 PLAN: ${data.plan}
 COUNTRY: ${data.country}
 PROFILES: ${data.profiles}
@@ -31,7 +31,9 @@ EXTRA MEMBER SLOTS: ${data.extraMembers}
 EMAIL: ${data.email}
 PAYMENT STATUS: ${data.paymentStatus}
 `);
-    
+
+  };   
+
   return (
     <div style={{ padding: "40px" }}>
       <h1>Cookie Checker</h1>
@@ -48,9 +50,9 @@ PAYMENT STATUS: ${data.paymentStatus}
         Check Cookie
       </button>
 
-     <pre style={{ whiteSpace: "pre-wrap", fontSize: "18px" }}>
-  {result}
-</pre>
+      <pre style={{ whiteSpace: "pre-wrap", fontSize: "18px" }}>
+        {result}
+      </pre>
 
     </div>
   );
