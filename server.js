@@ -6,6 +6,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.get("/", (req, res) => {
+  res.send("Netflix Checker Backend Running");
+});
 
 function convertCookieFormat(raw) {
   const lines = raw.split("\n");
