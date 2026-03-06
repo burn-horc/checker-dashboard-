@@ -12,7 +12,18 @@ export default function Dashboard() {
         className="w-full h-40 p-3 bg-zinc-900 rounded"
       />
 
-      const checkCookie = async () => {
+      <button
+  className="mt-4 bg-orange-500 px-4 py-2 rounded"
+  onClick={checkCookie}
+>
+Start Checking
+</button>
+
+    </div>
+  );
+}
+
+const checkCookie = async () => {
 
   const cookie = document.querySelector("textarea").value;
 
@@ -28,7 +39,3 @@ export default function Dashboard() {
 
   alert(data.status);
 };
-
-    </div>
-  );
-}
