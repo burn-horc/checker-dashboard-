@@ -9,6 +9,9 @@ app = "checker-dashboard"
   internal_port = 3000
   force_https = true
 
+[processes]
+  app = "node server.js"
+
 [[vm]]
   cpu_kind = "shared"
   cpus = 1
