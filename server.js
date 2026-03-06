@@ -29,29 +29,55 @@ function convertCookieFormat(raw) {
   if (!raw) return "";
 
   const cookies = [];
-
   const lines = raw.split(/\r?\n/);
 
   for (let line of lines) {
 
     line = line.trim();
-
     if (!line) continue;
-    if (line.startsWith("#")) continue;
 
-    // Netscape cookie file
-    if (line.includes(".netflix.com") || line.includes("netflix.com")) {
-
-      const parts = line.split(/\s+/);
-
-      if (parts.length >= 7) {
-        const name = parts[5];
-        const value = parts[6];
-        cookies.push(name + "=" + value);
-      }
-
+    // remove extra info after |
+    if (line.includes("|")) {
+      line = line.split("|")[0].trim();
     }
 
+    // JSON cookies
+    if (line.startsWith("[") || line.startsWith("{")) {
+      try {
+        const json = JSON.parse(line);
+
+        if (Array.isArray(json)) {
+          for (const c of json) {
+            cookies.push(`${c.name}=${c.value}`);
+          }
+        }
+
+        continue;
+      } catch {}
+    }
+
+    // Netscape format
+    if (line.includes(".netflix.com") && line.split(/\s+/).length >= 7) {
+      const parts = line.split(/\s+/);
+      cookies.push(parts[5] + "=" + parts[6]);
+      continue;
+    }
+
+    // Header format
+    if (line.toLowerCase().startsWith("cookie:")) {
+      cookies.push(line.replace(/cookie:/i, "").trim());
+      continue;
+    }
+
+    // Raw cookie
+    if (line.includes("=")) {
+      cookies.push(line);
+    }
+
+  }
+
+  return cookies.join("; ");
+}
     // Already in header format
     else if (line.includes("=") && !line.includes("\t")) {
       cookies.push(line);
@@ -70,6 +96,11 @@ app.post("/api/check", async (req, res) => {
 
   let { cookie } = req.body;
 
+const cookieList = cookie
+  .split("\n")
+  .map(c => convertCookieFormat(c))
+  .filter(Boolean); 
+
   if (!cookie) {
     return res.json({ status: "INVALID" });
   }
@@ -86,12 +117,29 @@ app.post("/api/check", async (req, res) => {
   redirect: "follow"
 });
 
-const text = await response.text();
+for (const ck of cookieList) {
 
-if (response.url.includes("login") || text.includes("Sign In")) {
-  return res.json({ status: "INVALID" });
+  const response = await fetch("https://www.netflix.com/browse", {
+    headers: {
+      "user-agent": "Mozilla/5.0",
+      "cookie": ck
+    }
+  });
+
+  const text = await response.text();
+
+  if (!text.includes("profilesGate")) {
+    continue;
+  }
+
+  return res.json({
+    status: "VALID",
+    cookie: ck
+  });
+
 }
 
+return res.json({ status: "INVALID" });
 
 
    /* =========================
