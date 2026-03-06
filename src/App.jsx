@@ -13,9 +13,9 @@ function App() {
       return;
     }
 
-    const cookieList = [cookies];
-      .map(c => c.trim())
-      .filter(c => c !== "");
+    const cookieList = [cookies]
+  .map(c => c.trim())
+  .filter(c => c !== "");
 
     setResults([]);
     setLoading(true);
