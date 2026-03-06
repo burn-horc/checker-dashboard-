@@ -17,11 +17,11 @@ function CheckerPage() {
 
   const data = await res.json();
 
-  if (data.plan) {
-    setResult(`${data.status} - ${data.plan}`);
-  } else {
-    setResult(data.status);
-  }
+  setResult(
+    data.plan
+      ? `${data.status} - ${data.plan}`
+      : data.status
+  );
 
 };
 
