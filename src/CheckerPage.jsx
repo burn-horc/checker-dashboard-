@@ -7,22 +7,22 @@ function CheckerPage() {
 
   const checkCookie = async () => {
 
-  const res = await fetch("/api/check", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ cookie })
-  });
+    const res = await fetch("/api/check", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ cookie })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (data.status !== "VALID") {
-    setResult("INVALID");
-    return;
-  }
+    if (data.status !== "VALID") {
+      setResult("INVALID");
+      return;
+    }
 
-  setResult(`
+    setResult(`
 PLAN: ${data.plan}
 COUNTRY: ${data.country}
 PROFILES: ${data.profiles}
@@ -31,9 +31,8 @@ EXTRA MEMBER SLOTS: ${data.extraMembers}
 EMAIL: ${data.email}
 PAYMENT STATUS: ${data.paymentStatus}
 `);
-};
 
-    
+  };
 
   return (
     <div style={{ padding: "20px" }}>
@@ -55,8 +54,8 @@ PAYMENT STATUS: ${data.paymentStatus}
       </button>
 
       <pre style={{whiteSpace:"pre-wrap"}}>
-{result}
-</pre>
+        {result}
+      </pre>
 
     </div>
   );
