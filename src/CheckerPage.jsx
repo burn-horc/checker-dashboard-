@@ -18,10 +18,12 @@ function CheckerPage() {
   const data = await res.json();
 
   setResult(
-    data.plan
-      ? `${data.status} - ${data.plan}`
-      : data.status
-  );
+`${data.status}
+Plan: ${data.plan}
+Country: ${data.country}
+Profiles: ${data.profiles}
+Extra Member: ${data.extra_member}`
+);
 
 };
 
