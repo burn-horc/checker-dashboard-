@@ -6,12 +6,14 @@ export async function checkCookie(cookie) {
       headers: {
         "user-agent": "Mozilla/5.0",
         "cookie": cookie
-      }
+      },
+      redirect: "follow"
     });
 
     const text = await response.text();
 
-    if (!text.includes("Netflix")) {
+    // If redirected to login page → cookie invalid
+    if (response.url.includes("login") || text.includes("Sign In")) {
       return {
         status: "INVALID"
       };
