@@ -92,50 +92,72 @@ if (response.url.includes("login")) {
 
 const text = await response.text();
 
+if (!text.includes("profilesGate")) {
+  return res.json({ status: "INVALID" });
+}
 
 
-    /* =========================
-       PARSE DATA
-    ========================= */
 
-    let plan = "UNKNOWN";
-if (text.includes("premium")) plan = "PREMIUM";
-else if (text.includes("standard")) plan = "STANDARD";
-else if (text.includes("basic")) plan = "BASIC";
-     
-    let country = "UNKNOWN";
+   /* =========================
+   PARSE ACCOUNT DATA
+========================= */
+
+let plan = "UNKNOWN";
+
+if (text.toLowerCase().includes("premium")) plan = "PREMIUM";
+else if (text.toLowerCase().includes("standard")) plan = "STANDARD";
+else if (text.toLowerCase().includes("basic")) plan = "BASIC";
+else if (text.toLowerCase().includes("mobile")) plan = "MOBILE";
+
+
+let country = "UNKNOWN";
 const countryMatch = text.match(/"currentCountry":"(.*?)"/);
 
 if (countryMatch) {
   country = countryMatch[1];
 }
 
-    let email = "UNKNOWN";
-    const emailMatch = text.match(/"email":"(.*?)"/);
-    if (emailMatch) email = emailMatch[1];
 
-    let profiles = 0;
-    const profileMatches = text.match(/profileName/g);
+let email = "UNKNOWN";
+const emailMatch = text.match(/"email":"(.*?)"/);
 
-    if (profileMatches) {
-    profiles = profileMatches.length;
-    }
+if (emailMatch) {
+  email = emailMatch[1];
+}
 
-     
-    let kidsProfiles = 0;
-    const kidsMatch = text.match(/"isKids":true/g);
-    if (kidsMatch) kidsProfiles = kidsMatch.length;
 
-    let extraMembers = "NONE";
-    if (text.toLowerCase().includes("extra member")) {
-      extraMembers = "AVAILABLE";
-    }
+let profiles = 0;
+const profileMatches = text.match(/profileName/g);
 
-    let paymentStatus = "ACTIVE";
-    if (!text.toLowerCase().includes("payment method")) {
-      paymentStatus = "UNKNOWN";
-    }
+if (profileMatches) {
+  profiles = profileMatches.length;
+}
 
+
+let kidsProfiles = 0;
+const kidsMatch = text.match(/"isKids":true/g);
+
+if (kidsMatch) {
+  kidsProfiles = kidsMatch.length;
+}
+
+
+let extraMembers = "NONE";
+
+if (text.toLowerCase().includes("extra member")) {
+  extraMembers = "AVAILABLE";
+}
+
+
+let paymentStatus = "UNKNOWN";
+
+if (text.toLowerCase().includes("visa") ||
+    text.toLowerCase().includes("mastercard") ||
+    text.toLowerCase().includes("paypal") ||
+    text.toLowerCase().includes("billing")) {
+
+  paymentStatus = "ACTIVE";
+}
     res.json({
       status: "VALID",
       plan,
