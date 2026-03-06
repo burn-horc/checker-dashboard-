@@ -19,15 +19,23 @@ app.post("/api/check", (req, res) => {
 
   const { cookie } = req.body;
 
-  if (!cookie) {
-    return res.status(400).json({
-      status: "NO COOKIE"
+  if (!cookie || cookie.length < 5) {
+    return res.json({
+      status: "INVALID"
     });
   }
 
-  res.json({
+  // fake detection example
+  if (cookie.includes("premium")) {
+    return res.json({
+      status: "VALID",
+      plan: "Premium"
+    });
+  }
+
+  return res.json({
     status: "VALID",
-    plan: "Premium"
+    plan: "Standard"
   });
 
 });
