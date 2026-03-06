@@ -36,12 +36,12 @@ function convertCookieFormat(raw) {
     line = line.trim();
     if (!line) continue;
 
-    // remove extra info after |
+    // remove metadata after |
     if (line.includes("|")) {
       line = line.split("|")[0].trim();
     }
 
-    // JSON cookie
+    // JSON cookies
     if (line.startsWith("[") || line.startsWith("{")) {
       try {
 
@@ -58,7 +58,7 @@ function convertCookieFormat(raw) {
       } catch {}
     }
 
-    // Netscape format
+    // Netscape cookie format
     if (line.includes(".netflix.com") && line.split(/\s+/).length >= 7) {
 
       const parts = line.split(/\s+/);
@@ -75,13 +75,13 @@ function convertCookieFormat(raw) {
       cookies.push(line.replace(/cookie:/i, "").trim());
       continue;
     }
-     
-// Raw cookie pair
-if (line.includes("=") && !line.includes(".netflix.com")) {
 
-  const pair = line.split(";")[0].trim();
-  cookies.push(pair);
-}
+    // Raw cookie pair
+    if (line.includes("=") && !line.includes(".netflix.com")) {
+
+      const pair = line.split(";")[0].trim();
+      cookies.push(pair);
+    }
 
   }
 
@@ -127,26 +127,27 @@ app.post("/api/check", async (req, res) => {
     for (const ck of cookieList) {
 
       const response = await fetch("https://www.netflix.com/browse", {
-  headers: {
-    "user-agent":
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
-    "accept-language": "en-US,en;q=0.9",
-    "cookie": ck
-  }
-});
+        headers: {
+          "user-agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
+          "accept-language": "en-US,en;q=0.9",
+          "cookie": ck
+        },
         redirect: "follow"
       });
 
       const text = await response.text();
 
-      if (
-  text.includes("profilesGate") ||
-  text.includes("memberHome") ||
-  text.includes("nmhp") ||
-  text.includes("netflix") && response.status === 200
-) {
-  return res.json({ status: "LIVE" });
-}
+      /* =========================
+         LIVE CHECK
+      ========================= */
+
+      const isLive =
+        text.includes("profilesGate") ||
+        text.includes("memberHome") ||
+        text.includes("profileName");
+
+      if (!isLive) continue;
 
       /* =========================
          PARSE ACCOUNT DATA
@@ -192,7 +193,7 @@ app.post("/api/check", async (req, res) => {
       }
 
       return res.json({
-        status: "VALID",
+        status: "LIVE",
         plan,
         country,
         profiles,
