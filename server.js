@@ -25,23 +25,41 @@ app.get("/", (req, res) => {
 ========================= */
 
 function convertCookieFormat(raw) {
-  const lines = raw.split("\n");
+
+  if (!raw) return "";
+
   const cookies = [];
 
+  const lines = raw.split(/\r?\n/);
+
   for (let line of lines) {
-    if (line.includes("\t")) {
-      const parts = line.split("\t");
+
+    line = line.trim();
+
+    if (!line) continue;
+    if (line.startsWith("#")) continue;
+
+    // Netscape cookie file
+    if (line.includes(".netflix.com") || line.includes("netflix.com")) {
+
+      const parts = line.split(/\s+/);
+
       if (parts.length >= 7) {
-        cookies.push(parts[5] + "=" + parts[6]);
+        const name = parts[5];
+        const value = parts[6];
+        cookies.push(name + "=" + value);
       }
+
     }
+
+    // Already in header format
+    else if (line.includes("=") && !line.includes("\t")) {
+      cookies.push(line);
+    }
+
   }
 
-  if (cookies.length > 0) {
-    return cookies.join("; ");
-  }
-
-  return raw;
+  return cookies.join("; ");
 }
 
 /* =========================
