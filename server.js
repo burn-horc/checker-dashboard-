@@ -1,15 +1,28 @@
 import express from "express";
 import cors from "cors";
 import fetch from "node-fetch";
+import path from "path";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+/* =========================
+   SERVE FRONTEND
+========================= */
+
+const __dirname = new URL('.', import.meta.url).pathname;
+
+app.use(express.static("dist"));
+
 app.get("/", (req, res) => {
-  res.send("Netflix Checker Backend Running");
+  res.sendFile(path.join(__dirname, "dist/index.html"));
 });
+
+/* =========================
+   COOKIE CONVERTER
+========================= */
 
 function convertCookieFormat(raw) {
   const lines = raw.split("\n");
@@ -31,7 +44,12 @@ function convertCookieFormat(raw) {
   return raw;
 }
 
+/* =========================
+   CHECK API
+========================= */
+
 app.post("/api/check", async (req, res) => {
+
   try {
 
     let { cookie } = req.body;
@@ -42,12 +60,15 @@ app.post("/api/check", async (req, res) => {
 
     cookie = convertCookieFormat(cookie);
 
-    const response = await fetch("https://www.netflix.com/account", {
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-        "Cookie": cookie
+    const response = await fetch(
+      "https://www.netflix.com/account",
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0",
+          "Cookie": cookie
+        }
       }
-    });
+    );
 
     const text = await response.text();
 
@@ -62,42 +83,29 @@ app.post("/api/check", async (req, res) => {
     else if (text.includes("Basic")) plan = "BASIC";
 
     let country = "UNKNOWN";
-    const countryMatch = text.match(/"currentCountry":"(.*?)"/);
 
-    if (countryMatch) {
-      country = countryMatch[1];
-    }
-
-    let profiles = "UNKNOWN";
-    const profileMatch = text.match(/"profiles":\[(.*?)\]/);
-
-    if (profileMatch) {
-      const count = profileMatch[1].split("{").length - 1;
-      profiles = count;
-    }
-
-    let extra = "NO";
-
-    if (text.includes("extraMember")) {
-      extra = "YES";
-    }
+    const match = text.match(/"currentCountry":"(.*?)"/);
+    if (match) country = match[1];
 
     res.json({
       status: "VALID",
       plan,
-      country,
-      profiles,
-      extra_member: extra
+      country
     });
 
-  } catch (err) {
+  } catch {
 
     res.json({
       status: "ERROR"
     });
 
   }
+
 });
+
+/* =========================
+   START SERVER
+========================= */
 
 const PORT = process.env.PORT || 8080;
 
