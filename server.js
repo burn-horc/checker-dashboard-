@@ -86,13 +86,9 @@ app.post("/api/check", async (req, res) => {
   redirect: "follow"
 });
 
-if (response.url.includes("login")) {
-  return res.json({ status: "INVALID" });
-}
-
 const text = await response.text();
 
-if (!text.includes("profilesGate")) {
+if (response.url.includes("login") || text.includes("Sign In")) {
   return res.json({ status: "INVALID" });
 }
 
