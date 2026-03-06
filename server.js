@@ -6,7 +6,7 @@ import path from "path";
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
 
 /* =========================
    SERVE FRONTEND
@@ -36,11 +36,12 @@ function convertCookieFormat(raw) {
     line = line.trim();
     if (!line) continue;
 
+    // remove extra info after |
     if (line.includes("|")) {
       line = line.split("|")[0].trim();
     }
 
-    // JSON cookies
+    // JSON cookie
     if (line.startsWith("[") || line.startsWith("{")) {
       try {
 
@@ -59,25 +60,51 @@ function convertCookieFormat(raw) {
 
     // Netscape format
     if (line.includes(".netflix.com") && line.split(/\s+/).length >= 7) {
+
       const parts = line.split(/\s+/);
-      cookies.push(parts[5] + "=" + parts[6]);
+      const name = parts[5];
+      const value = parts[6];
+
+      cookies.push(`${name}=${value}`);
       continue;
     }
 
     // Header format
     if (line.toLowerCase().startsWith("cookie:")) {
+
       cookies.push(line.replace(/cookie:/i, "").trim());
       continue;
     }
 
     // Raw cookie
     if (line.includes("=")) {
+
       cookies.push(line);
     }
 
   }
 
   return cookies.join("; ");
+}
+
+/* =========================
+   BUILD COOKIE LIST
+========================= */
+
+function extractCookies(input) {
+
+  if (!input) return [];
+
+  // Netscape block
+  if (input.includes(".netflix.com")) {
+    return [convertCookieFormat(input)];
+  }
+
+  // Multiple cookies separated by blank line
+  return input
+    .split(/\n\s*\n/)
+    .map(c => convertCookieFormat(c))
+    .filter(Boolean);
 }
 
 /* =========================
@@ -92,18 +119,7 @@ app.post("/api/check", async (req, res) => {
     return res.json({ status: "INVALID" });
   }
 
-  let cookieList = [];
-
-if (cookie.includes(".netflix.com")) {
-  // Netscape cookie block
-  cookieList = [convertCookieFormat(cookie)];
-} else {
-  // Multiple cookies separated by blank line
-  cookieList = cookie
-  .split(/\n\s*\n/)
-  .map(c => convertCookieFormat(c))
-  .filter(Boolean);
-}
+  const cookieList = extractCookies(cookie);
 
   try {
 
@@ -113,7 +129,8 @@ if (cookie.includes(".netflix.com")) {
         headers: {
           "user-agent": "Mozilla/5.0",
           "cookie": ck
-        }
+        },
+        redirect: "follow"
       });
 
       const text = await response.text();
@@ -133,26 +150,21 @@ if (cookie.includes(".netflix.com")) {
 
       let country = "UNKNOWN";
       const countryMatch = text.match(/"currentCountry":"(.*?)"/);
-
       if (countryMatch) country = countryMatch[1];
 
       let email = "UNKNOWN";
       const emailMatch = text.match(/"email":"(.*?)"/);
-
       if (emailMatch) email = emailMatch[1];
 
       let profiles = 0;
       const profileMatches = text.match(/profileName/g);
-
       if (profileMatches) profiles = profileMatches.length;
 
       let kidsProfiles = 0;
       const kidsMatch = text.match(/"isKids":true/g);
-
       if (kidsMatch) kidsProfiles = kidsMatch.length;
 
       let extraMembers = "NONE";
-
       if (text.toLowerCase().includes("extra member")) {
         extraMembers = "AVAILABLE";
       }
