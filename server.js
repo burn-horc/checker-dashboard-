@@ -15,10 +15,21 @@ const PORT = process.env.PORT || 8080;
 
 
 // API ROUTE
-app.get("/api/check", (req, res) => {
+app.post("/api/check", (req, res) => {
+
+  const { cookie } = req.body;
+
+  if (!cookie) {
+    return res.status(400).json({
+      status: "NO COOKIE"
+    });
+  }
+
   res.json({
-    status: "API WORKING"
+    status: "VALID",
+    plan: "Premium"
   });
+
 });
 
 
