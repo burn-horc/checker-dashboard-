@@ -3,14 +3,11 @@ app = "checker-dashboard"
 [build]
 
 [env]
-  PORT = "3000"
+  PORT = "8080"
 
 [http_service]
-  internal_port = 3000
+  internal_port = 8080
   force_https = true
-
-[processes]
-  app = "node server.js"
 
 [[vm]]
   cpu_kind = "shared"
