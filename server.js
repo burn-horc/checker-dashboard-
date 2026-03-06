@@ -83,7 +83,6 @@ app.post("/api/check", async (req, res) => {
     else if (text.includes("Basic")) plan = "BASIC";
 
     let country = "UNKNOWN";
-
     const match = text.match(/"currentCountry":"(.*?)"/);
     if (match) country = match[1];
 
@@ -93,16 +92,11 @@ app.post("/api/check", async (req, res) => {
       country
     });
 
-  } catch {
-
-    res.json({
-      status: "ERROR"
-    });
-
+  } catch (err) {
+    res.json({ status: "ERROR" });
   }
 
 });
-
 /* =========================
    START SERVER
 ========================= */
