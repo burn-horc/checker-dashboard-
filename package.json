@@ -1,13 +1,17 @@
 {
   "name": "checker-dashboard",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "start": "node server.js"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "node-fetch": "^3.3.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -18,23 +22,4 @@
     "postcss": "^8.4.38",
     "autoprefixer": "^10.4.19"
   }
-}
-{
-  "name": "checker-backend",
-  "version": "1.0.0",
-  "type": "module",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "express": "^4.19.2",
-    "cors": "^2.8.5",
-    "node-fetch": "^3.3.2"
-  }
-}
-"scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "start": "node server.js"
 }
