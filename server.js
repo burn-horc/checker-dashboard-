@@ -78,46 +78,47 @@ app.post("/api/check", async (req, res) => {
 
     cookie = convertCookieFormat(cookie);
 
-    const response = await fetch("https://www.netflix.com/account", {
+    const response = await fetch("https://www.netflix.com/browse", {
   headers: {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-    "Accept": "text/html,application/xhtml+xml",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Connection": "keep-alive",
-    "Cookie": cookie
+    cookie: cookie,
+    "user-agent": "Mozilla/5.0"
   }
 });
 
-    const text = await response.text();
+const text = await response.text();
 
-    if (!text.includes("account")) {
-      return res.json({ status: "INVALID" });
-    }
+if (!text.includes("Netflix")) {
+  return res.json({ status: "INVALID" });
+}
 
     /* =========================
        PARSE DATA
     ========================= */
 
     let plan = "UNKNOWN";
-
-    if (text.toLowerCase().includes("premium")) plan = "PREMIUM";
-    else if (text.toLowerCase().includes("standard")) plan = "STANDARD";
-    else if (text.toLowerCase().includes("basic")) plan = "BASIC";
-
+if (text.includes("premium")) plan = "PREMIUM";
+else if (text.includes("standard")) plan = "STANDARD";
+else if (text.includes("basic")) plan = "BASIC";
+     
     let country = "UNKNOWN";
-    const countryMatch = text.match(/"currentCountry":"(.*?)"/);
-    if (countryMatch) country = countryMatch[1];
+const countryMatch = text.match(/"currentCountry":"(.*?)"/);
+
+if (countryMatch) {
+  country = countryMatch[1];
+}
 
     let email = "UNKNOWN";
     const emailMatch = text.match(/"email":"(.*?)"/);
     if (emailMatch) email = emailMatch[1];
 
     let profiles = 0;
-    const profilesMatch = text.match(/"profiles":\[(.*?)\]/);
-    if (profilesMatch) {
-      profiles = (profilesMatch[1].match(/profileName/g) || []).length;
+    const profileMatches = text.match(/profileName/g);
+
+    if (profileMatches) {
+    profiles = profileMatches.length;
     }
 
+     
     let kidsProfiles = 0;
     const kidsMatch = text.match(/"isKids":true/g);
     if (kidsMatch) kidsProfiles = kidsMatch.length;
