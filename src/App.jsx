@@ -1,13 +1,7 @@
-import { useState } from "react";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
+import CheckerPage from "./CheckerPage";
 
-export default function App() {
-  const [access, setAccess] = useState(false);
-
-  return access ? (
-    <Dashboard />
-  ) : (
-    <Login onLogin={() => setAccess(true)} />
-  );
+function App() {
+  return <CheckerPage />;
 }
+
+export default App;
