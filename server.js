@@ -1,73 +1,92 @@
 import express from "express";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
-import axios from "axios";
+import fetch from "node-fetch";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+function convertCookieFormat(raw) {
+  const lines = raw.split("\n");
+  const cookies = [];
 
-const PORT = process.env.PORT || 8080;
-
-
-
-// REAL COOKIE CHECK
-app.post("/api/check", async (req, res) => {
-
-  const { cookie } = req.body;
-
-  if (!cookie) {
-    return res.json({ status: "INVALID" });
+  for (let line of lines) {
+    if (line.includes("\t")) {
+      const parts = line.split("\t");
+      if (parts.length >= 7) {
+        cookies.push(parts[5] + "=" + parts[6]);
+      }
+    }
   }
 
+  if (cookies.length > 0) {
+    return cookies.join("; ");
+  }
+
+  return raw;
+}
+
+app.post("/api/check", async (req, res) => {
   try {
 
-    const response = await axios.get(
-      "https://www.netflix.com/YourAccount",
+    let { cookie } = req.body;
+
+    if (!cookie) {
+      return res.json({ status: "INVALID" });
+    }
+
+    cookie = convertCookieFormat(cookie);
+
+    const response = await fetch(
+      "https://www.netflix.com/account",
       {
         headers: {
-          Cookie: cookie,
           "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-        },
-        timeout: 10000
+            "Mozilla/5.0",
+          "Cookie": cookie
+        }
       }
     );
 
-    if (response.data.includes("account")) {
-      res.json({
-        status: "VALID",
-        plan: "Detected"
-      });
-    } else {
-      res.json({
-        status: "INVALID"
-      });
+    const text = await response.text();
+
+    if (!text.includes("account")) {
+      return res.json({ status: "INVALID" });
     }
 
-  } catch (error) {
+    let plan = "UNKNOWN";
+
+    if (text.includes("Premium")) {
+      plan = "PREMIUM";
+    } else if (text.includes("Standard")) {
+      plan = "STANDARD";
+    } else if (text.includes("Basic")) {
+      plan = "BASIC";
+    }
+
+    let country = "UNKNOWN";
+
+    const match = text.match(/"currentCountry":"(.*?)"/);
+    if (match) {
+      country = match[1];
+    }
+
     res.json({
-      status: "INVALID"
+      status: "VALID",
+      plan,
+      country
     });
+
+  } catch (err) {
+
+    res.json({
+      status: "ERROR"
+    });
+
   }
-
 });
 
-
-
-// SERVE FRONTEND
-app.use(express.static(path.join(__dirname, "dist")));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
-});
-
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(3000, () => {
+  console.log("Checker server running");
 });
