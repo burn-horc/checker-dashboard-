@@ -6,6 +6,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 app.get("/", (req, res) => {
   res.send("Netflix Checker Backend Running");
 });
@@ -41,16 +42,12 @@ app.post("/api/check", async (req, res) => {
 
     cookie = convertCookieFormat(cookie);
 
-    const response = await fetch(
-      "https://www.netflix.com/account",
-      {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0",
-          "Cookie": cookie
-        }
+    const response = await fetch("https://www.netflix.com/account", {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        "Cookie": cookie
       }
-    );
+    });
 
     const text = await response.text();
 
@@ -60,25 +57,37 @@ app.post("/api/check", async (req, res) => {
 
     let plan = "UNKNOWN";
 
-    if (text.includes("Premium")) {
-      plan = "PREMIUM";
-    } else if (text.includes("Standard")) {
-      plan = "STANDARD";
-    } else if (text.includes("Basic")) {
-      plan = "BASIC";
-    }
+    if (text.includes("Premium")) plan = "PREMIUM";
+    else if (text.includes("Standard")) plan = "STANDARD";
+    else if (text.includes("Basic")) plan = "BASIC";
 
     let country = "UNKNOWN";
+    const countryMatch = text.match(/"currentCountry":"(.*?)"/);
 
-    const match = text.match(/"currentCountry":"(.*?)"/);
-    if (match) {
-      country = match[1];
+    if (countryMatch) {
+      country = countryMatch[1];
+    }
+
+    let profiles = "UNKNOWN";
+    const profileMatch = text.match(/"profiles":\[(.*?)\]/);
+
+    if (profileMatch) {
+      const count = profileMatch[1].split("{").length - 1;
+      profiles = count;
+    }
+
+    let extra = "NO";
+
+    if (text.includes("extraMember")) {
+      extra = "YES";
     }
 
     res.json({
       status: "VALID",
       plan,
-      country
+      country,
+      profiles,
+      extra_member: extra
     });
 
   } catch (err) {
