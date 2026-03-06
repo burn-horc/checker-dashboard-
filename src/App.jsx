@@ -34,7 +34,7 @@ function App() {
 
         const data = await res.json();
 
-        if (data.status === "VALID") {
+        if (data.status === "LIVE")
 
           setResults(prev => [
             ...prev,
