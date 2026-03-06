@@ -92,10 +92,18 @@ app.post("/api/check", async (req, res) => {
     return res.json({ status: "INVALID" });
   }
 
-  const cookieList = cookie
-    .split("\n")
+  let cookieList = [];
+
+if (cookie.includes(".netflix.com")) {
+  // Netscape cookie block
+  cookieList = [convertCookieFormat(cookie)];
+} else {
+  // Multiple cookies separated by blank line
+  cookieList = cookie
+    .split("\n\n")
     .map(c => convertCookieFormat(c))
     .filter(Boolean);
+}
 
   try {
 
