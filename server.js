@@ -75,12 +75,13 @@ function convertCookieFormat(raw) {
       cookies.push(line.replace(/cookie:/i, "").trim());
       continue;
     }
+     
+// Raw cookie pair
+if (line.includes("=") && !line.includes(".netflix.com")) {
 
-    // Raw cookie
-    if (line.includes("=")) {
-
-      cookies.push(line);
-    }
+  const pair = line.split(";")[0].trim();
+  cookies.push(pair);
+}
 
   }
 
