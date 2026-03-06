@@ -2,9 +2,6 @@ import express from "express";
 import cors from "cors";
 import { checkCookie } from "./main.js";
 
-const express = require("express");
-const cors = require("cors");
-
 const app = express();
 
 app.use(cors());
@@ -25,7 +22,6 @@ app.post("/check", async (req, res) => {
     const result = await checkCookie(cookie);
 
     res.json(result);
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
