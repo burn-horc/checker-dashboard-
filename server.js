@@ -44,11 +44,3 @@ app.get("*", (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-fetch("/api/check", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({ cookie })
-});
