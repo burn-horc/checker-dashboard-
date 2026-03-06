@@ -16,8 +16,12 @@ function CheckerPage() {
     });
 
     const data = await res.json();
-    setResult(data.status + " - " + data.plan);
-  };
+    
+    setResult(
+  data.plan
+    ? `${data.status} - ${data.plan}`
+    : data.status
+);
 
   return (
     <div style={{ padding: "20px" }}>
