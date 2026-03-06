@@ -17,10 +17,21 @@ function App() {
 
     const data = await res.json();
 
-    setResult(`${data.status} - ${data.plan}`);
+    if (data.status !== "VALID") {
+  setResult("INVALID");
+  return;
+}
 
-  };
-
+setResult(`
+PLAN: ${data.plan}
+COUNTRY: ${data.country}
+PROFILES: ${data.profiles}
+KIDS PROFILES: ${data.kidsProfiles}
+EXTRA MEMBER SLOTS: ${data.extraMembers}
+EMAIL: ${data.email}
+PAYMENT STATUS: ${data.paymentStatus}
+`);
+    
   return (
     <div style={{ padding: "40px" }}>
       <h1>Cookie Checker</h1>
