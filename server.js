@@ -124,14 +124,14 @@ app.post("/api/check", async (req, res) => {
     for (const ck of cookieList) {
 
       const response = await fetch("https://www.netflix.com/browse", {
-        headers: {
-          "user-agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
-          "accept-language": "en-US,en;q=0.9",
-          "cookie": ck
-        },
-        redirect: "follow"
-      });
+  headers: {
+    "user-agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
+    "accept-language": "en-US,en;q=0.9",
+    "cookie": ck
+  },
+  redirect: "follow"
+});
 
       const text = await response.text();
 
