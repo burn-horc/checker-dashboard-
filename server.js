@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import fetch from "node-fetch";
 import path from "path";
+import NetflixAccountChecker from "./main.js";
 
 const app = express();
 
@@ -118,22 +119,20 @@ app.post("/api/check", async (req, res) => {
     return res.json({ status: "INVALID" });
   }
 
-  const cookieList = extractCookies(cookie);
-
   try {
 
-    for (const ck of cookieList) {
+    const result = await checker.checkCookie(cookie);
 
-      const response = await fetch("https://www.netflix.com/browse", {
-  headers: {
-    "user-agent":
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
-    "accept-language": "en-US,en;q=0.9",
-    "cookie": ck
-  },
-  redirect: "follow"
+    return res.json(result);
+
+  } catch (err) {
+
+    console.error(err);
+    res.json({ status: "ERROR" });
+
+  }
+
 });
-
       const text = await response.text();
 
       /* =========================
