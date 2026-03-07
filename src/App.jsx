@@ -8,74 +8,68 @@ function App() {
 
   const startCheck = async () => {
 
-    if (!cookies) {
-      alert("Paste cookies first");
-      return;
-    }
-
-    const cookieLines = cookies
-    .split("\n")
-    .map(l => l.trim())
-    .filter(Boolean);
-
-  let cookieString = "";
-
-  cookieLines.forEach(line => {
-
-    const parts = line.split(" ");
-
-    if (parts.length >= 7) {
-
-      const name = parts[5];
-      const value = parts.slice(6).join(" ");
-
-      cookieString += `${name}=${value}; `;
-
-    }
-
-  });
+  if (!cookies) {
+    alert("Paste cookies first");
+    return;
+  }
 
   setResults([]);
   setLoading(true);
 
-    for (let cookie of cookieList) {
+  try {
 
-      try {
+    const cookieLines = cookies
+      .split("\n")
+      .map(l => l.trim())
+      .filter(Boolean);
 
-        const res = await fetch("/api/check", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({ cookie: cookieString })
-});
+    let cookieString = "";
 
-        const data = await res.json();
+    cookieLines.forEach(line => {
 
-        if (data.status === "LIVE") {
+      const parts = line.split(" ");
 
-          setResults(prev => [
-            ...prev,
-            `LIVE | ${data.plan} | ${data.country} | PROFILES:${data.profiles}`
-          ]);
+      if (parts.length >= 7) {
 
-        } else {
+        const name = parts[5];
+        const value = parts.slice(6).join(" ");
 
-          setResults(prev => [...prev, "BAD"]);
-
-        }
-
-      } catch (err) {
-
-        setResults(prev => [...prev, "ERROR"]);
-
+        cookieString += `${name}=${value}; `;
       }
+
+    });
+
+    const res = await fetch("/api/check", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ cookie: cookieString })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "LIVE") {
+
+      setResults([
+        `LIVE | ${data.plan} | ${data.country} | PROFILES:${data.profiles}`
+      ]);
+
+    } else {
+
+      setResults(["BAD"]);
 
     }
 
-    setLoading(false);
+  } catch (err) {
 
-  };
+    setResults(["ERROR"]);
+
+  }
+
+  setLoading(false);
+
+};
 
   return (
     <div style={{ padding: "40px", fontFamily: "Arial" }}>
