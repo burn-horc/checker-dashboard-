@@ -43,12 +43,12 @@ function App() {
       try {
 
         const res = await fetch("/api/check", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ cookie })
-        });
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ cookie: cookieString })
+});
 
         const data = await res.json();
 
