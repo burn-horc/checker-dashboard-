@@ -13,13 +13,30 @@ function App() {
       return;
     }
 
-    const cookieList = cookies
-      .split("\n")
-      .map(c => c.trim())
-      .filter(Boolean);
+    const cookieLines = cookies
+    .split("\n")
+    .map(l => l.trim())
+    .filter(Boolean);
 
-    setResults([]);
-    setLoading(true);
+  let cookieString = "";
+
+  cookieLines.forEach(line => {
+
+    const parts = line.split(" ");
+
+    if (parts.length >= 7) {
+
+      const name = parts[5];
+      const value = parts.slice(6).join(" ");
+
+      cookieString += `${name}=${value}; `;
+
+    }
+
+  });
+
+  setResults([]);
+  setLoading(true);
 
     for (let cookie of cookieList) {
 
